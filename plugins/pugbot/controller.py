@@ -23,6 +23,7 @@ class Controller:
 #        self.chat_client = chat_client
         self.irc_client = irc_client
         self.pugbot = PugBot()
+        self.games_list = self.pugbot.get_games().keys()
         # Subscribe to events
         self.irc_client.on_command += self.on_irc_command
 #        self.chat_client.on_join += self.on_chat_join
@@ -40,9 +41,9 @@ class Controller:
         # Commands
         self.commands = {
                          'add': self.add_player,
-#                         'remove': self.remove_player,
-                         'list': self.list_games,
-                         'who': self.list_players,
+                         'remove': self.remove_player,
+                         'who': self.list_games,
+                         'tits': self.tits,
                          }
 #        self.commands = {
 #            'send': self.irc_send,
@@ -100,29 +101,19 @@ class Controller:
         
     def add_player(self, user, args):
         self.games = args.split()
-        print self.games
-        
-        for s in self.games:
-            print s
-            i = self.pugbot.on_player_add(user, s)
-            if i in 'Added':
-                self.irc_client.send_message('You added to %s' %s)
-            elif i in 'aAdded':
-                self.irc_client.send_message('You already added to %s ' %s)
-            elif i in 'Wrong':
-                self.irc_client.send_message('Wrong game type %s, correct gametypes are: ' %s)
+        i = self.pugbot.on_player_add(user, self.games)
+        self.irc_client.send_message(i)
+    
+    def tits(self, *args):
+        self.irc_client.send_message('http://goo.gl/hEHBX')
     
     def list_games(self, user, args):
         games = self.pugbot.get_games()
         self.irc_client.send_message('current adds: %s ' % games)
-        
-    def list_players(self, *args):
-        if args > 0:
-            players=self.pugbot.get_players_list(*args)
-            self.irc_client.send_message('For game: %s Listed %s players: %s' % (args, len(players), players))
-        else:
-            players=self.pugbot.get_players_list()
-        
+            
+    def remove_player(self, user, args):
+        self.args = args.split()
+        self.irc_client.send_message(self.pugbot.on_player_remove(user, self.args))
         
 #    def irc_send(self, data):
 #        # !send message
